@@ -1,0 +1,43 @@
+[tool.poetry]
+name = "confluent_cloud_sdk"
+version = "0.0.1"
+description = "Confluent Cloud API SDK"
+authors = ["John Preston <john@ews-network.net>"]
+license = "GPL-2-only"
+readme = "README.rst"
+keywords = ["compose-x", "aws", "cloudformation", "docker", "compose"]
+classifiers = [
+  "Development Status :: 4 - Beta",
+  "Intended Audience :: Developers",
+  "Intended Audience :: System Administrators",
+  "Intended Audience :: Information Technology",
+  "License :: OSI Approved :: Mozilla Public License 2.0 (MPL 2.0)",
+  "Natural Language :: English",
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3.7",
+  "Programming Language :: Python :: 3.8",
+  "Programming Language :: Python :: 3.9",
+]
+exclude = ["*.pyc", "*~", "*pycache*"]
+
+[tool.poetry.dependencies]
+python = "^3.7"
+requests = "^2.27.1"
+
+[tool.poetry.urls]
+"Bug Tracker" = "https://codeberg.org/compose-x/confluent-cloud-sdk/issues"
+
+[tool.poetry.dev-dependencies]
+isort = "^5.10.1"
+black = "^22.1.0"
+Sphinx = "^4.4.0"
+sphinx-material = "^0.0.35"
+coverage = "^6.3.1"
+tox = "^3.24.5"
+sphinx-jsonschema = "^1.17.2"
+compose-x-common = "^0.4.2"
+pre-commit = "^2.17.0"
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
