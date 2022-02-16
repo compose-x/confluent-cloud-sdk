@@ -1,5 +1,5 @@
-Welcome to Confluent Admin API SDK's documentation!
-======================================
+Welcome to Confluent Admin SDK Documentation
+====================================================
 
 .. toctree::
    :maxdepth: 2

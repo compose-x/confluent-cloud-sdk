@@ -4,7 +4,7 @@
 # You can set these variables from the command line.
 SPHINXOPTS    =
 SPHINXBUILD   = python -msphinx
-SPHINXPROJ    = confluent_admin_api_sdk
+SPHINXPROJ    = confluent-cloud-sdk
 SOURCEDIR     = .
 BUILDDIR      = _build
 

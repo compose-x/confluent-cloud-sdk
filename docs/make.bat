@@ -9,7 +9,7 @@ if "%SPHINXBUILD%" == "" (
 )
 set SOURCEDIR=.
 set BUILDDIR=_build
-set SPHINXPROJ=confluent_admin_api_sdk
+set SPHINXPROJ=confluent-cloud-sdk
 
 if "%1" == "" goto help
 

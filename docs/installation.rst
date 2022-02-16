@@ -12,7 +12,7 @@ To install Confluent Admin API SDK, run this command in your terminal:
 
 .. code-block:: console
 
-    $ pip install confluent_admin_api_sdk
+    $ pip install confluent-cloud-sdk
 
 This is the preferred method to install Confluent Admin API SDK, as it will always install the most recent stable release.
 
@@ -32,13 +32,13 @@ You can either clone the public repository:
 
 .. code-block:: console
 
-    $ git clone git://github.com/compose-x/confluent_admin_api_sdk
+    $ git clone git://github.com/compose-x/confluent-cloud-sdk
 
 Or download the `tarball`_:
 
 .. code-block:: console
 
-    $ curl -OJL https://github.com/compose-x/confluent_admin_api_sdk/tarball/master
+    $ curl -OJL https://github.com/compose-x/confluent-cloud-sdk/tarball/master
 
 Once you have a copy of the source, you can install it with:
 
@@ -47,5 +47,5 @@ Once you have a copy of the source, you can install it with:
     $ python setup.py install
 
 
-.. _Github repo: https://github.com/compose-x/confluent_admin_api_sdk
-.. _tarball: https://github.com/compose-x/confluent_admin_api_sdk/tarball/master
+.. _Github repo: https://github.com/compose-x/confluent-cloud-sdk
+.. _tarball: https://github.com/compose-x/confluent-cloud-sdk/tarball/master

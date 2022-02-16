@@ -48,7 +48,7 @@ clean-test: ## remove test and coverage artifacts
 	rm -fr .pytest_cache
 
 lint: ## check style with flake8
-	flake8 confluent_admin_api_sdk tests
+	flake8 src/confluent_cloud_sdk tests
 
 test: ## run tests quickly with the default Python
 	pytest
@@ -57,15 +57,15 @@ test-all: ## run tests on every Python version with tox
 	tox
 
 coverage: ## check code coverage quickly with the default Python
-	coverage run --source confluent_admin_api_sdk -m pytest
+	coverage run --source src/confluent_cloud_sdk -m pytest
 	coverage report -m
 	coverage html
 	$(BROWSER) htmlcov/index.html
 
 docs: ## generate Sphinx HTML documentation, including API docs
-	rm -f docs/confluent_admin_api_sdk.rst
+	rm -f docs/src/confluent_cloud_sdk.rst
 	rm -f docs/modules.rst
-	sphinx-apidoc -o docs/ confluent_admin_api_sdk
+	sphinx-apidoc -o docs/ src/confluent_cloud_sdk
 	$(MAKE) -C docs clean
 	$(MAKE) -C docs html
 	$(BROWSER) docs/_build/html/index.html

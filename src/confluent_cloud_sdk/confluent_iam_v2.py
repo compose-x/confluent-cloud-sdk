@@ -150,13 +150,11 @@ class ApiKey(IamV2Object):
         owner_id: str = None,
         resource_id: str = None,
     ):
-        self._name = display_name
-        self._client = client_factory
+        super().__init__(client_factory, display_name, description)
         self._id = obj_id
         self._resource_id = resource_id
         self._owner_id = owner_id
         self._href = None
-        super().__init__(client_factory, display_name, description)
         self.api_path = self.api_keys_path
 
     @property
