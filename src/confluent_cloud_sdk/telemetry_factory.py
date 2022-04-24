@@ -1,4 +1,3 @@
-#   -*- coding: utf-8 -*-
 #  SPDX-License-Identifier: GPL-2.0-only
 #  Copyright 2022 John Mille <john@compose-x.io>
 
@@ -10,10 +9,10 @@ import base64
 
 import requests
 
-from .errors import evaluate_atlas_api_return
+from .errors import evaluate_api_return
 
 
-class ConfluentTelemetry(object):
+class ConfluentTelemetry:
     """
     Class to be the client for connections to Confluent Kafka Telemetry API
     See `Confluent Cloud Telemetry API Reference <https://api.telemetry.confluent.cloud/docs>`_
@@ -36,7 +35,7 @@ class ConfluentTelemetry(object):
             "Authorization": f"Basic {self._auth_hash}",
         }
 
-    @evaluate_atlas_api_return
+    @evaluate_api_return
     def get(self, url: str, ignore_failure: bool = False, **kwargs):
         """
         Requests.GET wrapper
@@ -49,7 +48,7 @@ class ConfluentTelemetry(object):
         req = requests.get(url, headers=self.headers, **kwargs)
         return req
 
-    @evaluate_atlas_api_return
+    @evaluate_api_return
     def post(self, url: str, data: dict, ignore_failure: bool = False, **kwargs):
         """
         Requests.GET wrapper
@@ -62,7 +61,7 @@ class ConfluentTelemetry(object):
         req = requests.post(url, headers=self.headers, json=data, **kwargs)
         return req
 
-    @evaluate_atlas_api_return
+    @evaluate_api_return
     def patch(self, url: str, data: dict, ignore_failure: bool = False, **kwargs):
         """
         Requests.GET wrapper
@@ -75,7 +74,7 @@ class ConfluentTelemetry(object):
         req = requests.patch(url, headers=self.headers, json=data, **kwargs)
         return req
 
-    @evaluate_atlas_api_return
+    @evaluate_api_return
     def delete(self, url: str, ignore_failure: bool = False, **kwargs):
         """
         Requests.GET wrapper

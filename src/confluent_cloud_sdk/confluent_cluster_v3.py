@@ -1,11 +1,10 @@
-#   -*- coding: utf-8 -*-
 #  SPDX-License-Identifier: GPL-2.0-only
 #  Copyright 2022 John Mille <john@compose-x.io>
 
 from .client_factory import ConfluentClient
 
 
-class KafkaClusterV3(object):
+class KafkaClusterV3:
     """
     Class to represent kafka cluster
     The confluent client must be using Cluster API keys, not Global/Cloud API keys

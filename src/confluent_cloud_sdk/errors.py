@@ -1,9 +1,8 @@
-#  -*- coding: utf-8 -*-
 # SPDX-License-Identifier: GPL-2.0-only
 # Copyright 2022 John Mille <john@compose-x.io>
 
 """
-MongoDB Atlas API SDK Exceptions and error handling
+Confluent Cloud API SDK Exceptions and error handling
 """
 
 from compose_x_common.compose_x_common import keyisset
@@ -53,6 +52,15 @@ class GenericUnauthorized(ConfluentException):
         super().__init__(details.get("detail", "Access unauthorized"), code, details)
 
 
+class GenericRequestError(ConfluentException):
+    """
+    Generic option for 400 return code
+    """
+
+    def __init__(self, code, details):
+        super().__init__(details.get("detail", "Request error"), code, details)
+
+
 class GenericForbidden(ConfluentException):
     """
     Generic exception for a 403
@@ -76,10 +84,12 @@ class ConfluentApiException(ConfluentException):
             raise GenericUnauthorized(code, details)
         elif code == 403:
             raise GenericForbidden(code, details)
+        elif code == 400:
+            raise GenericRequestError(code, details)
         super().__init__("Something was wrong with the client request.", code, details)
 
 
-def evaluate_atlas_api_return(function):
+def evaluate_api_return(function):
     """
     Decorator to evaluate the requests payload returned
     """

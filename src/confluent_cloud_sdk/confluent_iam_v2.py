@@ -1,12 +1,11 @@
-#   -*- coding: utf-8 -*-
 #  SPDX-License-Identifier: GPL-2.0-only
 #  Copyright 2022 John Mille <john@compose-x.io>
-
+import json
 
 from .client_factory import ConfluentClient
 
 
-class IamV2Object(object):
+class IamV2Object:
     """
     IAM V2 Objects class
     """
@@ -104,9 +103,9 @@ class ServiceAccount(IamV2Object):
                 self._client,
                 obj_id=_api_key["id"],
                 owner_id=self.obj_id,
-                resource_id=_api_key["resource"]["id"],
+                resource_id=_api_key["spec"]["resource"]["id"],
             )
-            new_key.href = _api_key["metadata"]["self"]
+            # new_key.href = _api_key["metadata"]["self"]
             self._api_keys.append(new_key)
 
     def set_from_read(self, display_name: str = None, account_id: str = None):
@@ -156,6 +155,7 @@ class ApiKey(IamV2Object):
         self._owner_id = owner_id
         self._href = None
         self.api_path = self.api_keys_path
+        self._secret = None
 
     @property
     def owner_id(self):
@@ -191,18 +191,25 @@ class ApiKey(IamV2Object):
         elif not description and self._description:
             description = self._description
         payload = {
-            "owner": {"id": owner_id},
-            "resource": {"id": resource_id},
-            "display_name": display_name,
-            "description": description,
+            "spec": {
+                "owner": {"id": owner_id},
+                "resource": {"id": resource_id},
+                "display_name": display_name,
+                "description": description,
+            }
         }
         req = self._client.post(
             url,
             data=payload,
         )
         reply_data = req.json()
+        import json
+
+        print(json.dumps(reply_data, indent=2))
+        spec = reply_data["spec"]
         self.obj_id = reply_data["id"]
         self._href = reply_data["metadata"]["self"]
-        self._owner_id = reply_data["owner"]["id"]
-        self._resource_id = reply_data["resource"]["id"]
+        self._owner_id = spec["owner"]["id"]
+        self._resource_id = spec["resource"]["id"]
+        self._secret = spec["secret"]
         return req
