@@ -1,7 +1,12 @@
 #  SPDX-License-Identifier: GPL-2.0-only
 #  Copyright 2022 John Mille <john@compose-x.io>
 
-from .client_factory import ConfluentClient
+from __future__ import annotations
+
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from .client_factory import ConfluentClient
 
 
 class KafkaClusterV3:

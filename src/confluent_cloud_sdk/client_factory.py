@@ -4,6 +4,8 @@
 """
 Client factory
 """
+from __future__ import annotations
+
 import base64
 
 import requests
@@ -83,6 +85,5 @@ class ConfluentClient:
         :param kwargs:
         :return:
         """
-        print(url)
         req = requests.delete(url, headers=self.headers, **kwargs)
         return req

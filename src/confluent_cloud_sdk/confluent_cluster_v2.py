@@ -1,9 +1,7 @@
 #  SPDX-License-Identifier: GPL-2.0-only
 #  Copyright 2022 John Mille <john@compose-x.io>
 
-from compose_x_common.compose_x_common import keyisset
-
-from .client_factory import ConfluentClient
+from __future__ import annotations
 
 
 class KafkaClusterV2:

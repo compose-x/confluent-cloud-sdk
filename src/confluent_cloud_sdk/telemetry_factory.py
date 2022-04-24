@@ -1,9 +1,10 @@
 #  SPDX-License-Identifier: GPL-2.0-only
 #  Copyright 2022 John Mille <john@compose-x.io>
 
+from __future__ import annotations
 
 """
-Client factory
+Client factory for the confluent cloud telemetry API
 """
 import base64
 

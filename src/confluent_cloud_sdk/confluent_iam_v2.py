@@ -1,8 +1,15 @@
 #  SPDX-License-Identifier: GPL-2.0-only
 #  Copyright 2022 John Mille <john@compose-x.io>
-import json
 
-from .client_factory import ConfluentClient
+
+from __future__ import annotations
+
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from .client_factory import ConfluentClient
+
+import json
 
 
 class IamV2Object:
@@ -96,7 +103,6 @@ class ServiceAccount(IamV2Object):
 
     def import_api_keys(self):
         url = f"{self._client.api_url}{self.api_keys_path}?owner={self.obj_id}"
-        print("URL IS", url)
         req = self._client.get(url)
         for _api_key in req.json()["data"]:
             new_key = ApiKey(
@@ -127,7 +133,6 @@ class ServiceAccount(IamV2Object):
         elif not account_id and display_name:
             accounts = self.list().json()["data"]
             for _account in accounts:
-                print(_account)
                 if _account["display_name"] == display_name:
                     self._href = _account["metadata"]["self"]
                     self.obj_id = _account["id"]
@@ -203,9 +208,6 @@ class ApiKey(IamV2Object):
             data=payload,
         )
         reply_data = req.json()
-        import json
-
-        print(json.dumps(reply_data, indent=2))
         spec = reply_data["spec"]
         self.obj_id = reply_data["id"]
         self._href = reply_data["metadata"]["self"]
