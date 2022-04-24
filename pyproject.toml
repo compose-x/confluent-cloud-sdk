@@ -38,6 +38,44 @@ compose-x-common = "^0.4.2"
 pre-commit = "^2.17.0"
 pyupgrade = "^2.32.0"
 pyclean = "^2.2.0"
+tbump = "^6.8.0"
+
+[tool.tbump]
+github_url = "https://codeberg.org/compose-x/confluent-cloud-sdk"
+
+[tool.tbump.version]
+current = "0.0.1"
+
+regex = '''
+  (?P<major>\d+)
+  \.
+  (?P<minor>\d+)
+  \.
+  (?P<patch>\d+)
+  (?:(?P<rc>[\S]+))?
+  '''
+
+[tool.tbump.git]
+message_template = "Bump to {new_version}"
+tag_template = "v{new_version}"
+
+[[tool.tbump.file]]
+src = "pyproject.toml"
+
+[[tool.tbump.file]]
+src = "src/confluent_cloud_sdk/__init__.py"
+
+[tool.black]
+line-length = 88
+
+[tool.isort]
+profile = "black"
+multi_line_output = 3
+include_trailing_comma = true
+force_grid_wrap = 0
+use_parentheses = true
+known_first_party = "kelvin"
+
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]
