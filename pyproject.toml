@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "confluent_cloud_sdk"
-version = "0.0.1"
+version = "0.1.0"
 description = "Confluent Cloud API SDK"
 authors = ["John Preston <john@ews-network.net>"]
 license = "GPL-2-only"
@@ -9,7 +9,7 @@ keywords = ["kafka", "confluent", "sdk"]
 classifiers = [
     "Development Status :: 4 - Beta",
     "Intended Audience :: Developers",
-    "OSI Approved :: GNU General Public License v2 (GPLv2)",
+    "License :: OSI Approved :: GNU General Public License v2 (GPLv2)",
     "Natural Language :: English",
     "Programming Language :: Python :: 3",
     "Programming Language :: Python :: 3.7",
@@ -44,7 +44,7 @@ tbump = "^6.8.0"
 github_url = "https://codeberg.org/compose-x/confluent-cloud-sdk"
 
 [tool.tbump.version]
-current = "0.0.1"
+current = "0.1.0"
 
 regex = '''
   (?P<major>\d+)
