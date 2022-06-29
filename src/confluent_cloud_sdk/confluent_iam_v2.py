@@ -9,7 +9,7 @@ from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from .client_factory import ConfluentClient
 
-from compose_x_common.compose_x_common import keyisset
+from compose_x_common.compose_x_common import keyisset, set_else_none
 
 
 class IamV2Object:
@@ -197,12 +197,13 @@ class ApiKey(IamV2Object):
         if key_id:
             self.obj_id = key_id
             data = self.read().json()
+            data_spec = data["spec"]
             self.obj_id = data["id"]
-            self._resource_id = data["spec"]["resource"]["id"]
-            self._environment = data["spec"]["resource"]["environment"]
-            self._owner_id = data["spec"]["owner"]["id"]
-            self._description = data["spec"]["description"]
-            self._name = data["spec"]["display_name"]
+            self._resource_id = set_else_none("id", set_else_none("resource", data_spec, alt_value={}))
+            self._environment = set_else_none("environment", set_else_none("resource", data_spec, alt_value={}))
+            self._owner_id = set_else_none("id", set_else_none("owner", data_spec, alt_value={}))
+            self._description = data_spec["description"]
+            self._name = data_spec["display_name"]
 
     @property
     def resource_id(self):
