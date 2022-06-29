@@ -31,6 +31,7 @@ class IamV2Object:
         self._id = None
         self._name = display_name
         self._description = description
+        self._environment = None
         self._href = None
         self.api_path = None
 
@@ -185,6 +186,23 @@ class ApiKey(IamV2Object):
     @property
     def owner_id(self):
         return self._owner_id
+
+    def set_from_read(self, key_id: str = None):
+        """
+        Sets the properties from lookup
+        :param key_id:
+        :return:
+        """
+        key_id = key_id if key_id else self.obj_id
+        if key_id:
+            self.obj_id = key_id
+            data = self.read().json()
+            self.obj_id = data["id"]
+            self._resource_id = data["spec"]["resource"]["id"]
+            self._environment = data["spec"]["resource"]["environment"]
+            self._owner_id = data["spec"]["owner"]["id"]
+            self._description = data["spec"]["description"]
+            self._name = data["spec"]["display_name"]
 
     @property
     def resource_id(self):
