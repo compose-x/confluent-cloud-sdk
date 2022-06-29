@@ -9,7 +9,7 @@ from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from .client_factory import ConfluentClient
 
-import json
+from compose_x_common.compose_x_common import keyisset
 
 
 class IamV2Object:
@@ -52,10 +52,28 @@ class IamV2Object:
     def href(self, url):
         self._href = url
 
-    def list(self):
-        if self.api_path:
-            return self._client.get(f"{self._client.api_url}{self.api_path}")
-        return None
+    def list(self, url_override: str = None) -> dict:
+        __all: list = []
+        __return = {"ServiceAccountList": __all}
+        __url = (
+            f"{self._client.api_url}{self.api_path}?page_size=30"
+            if not url_override
+            else url_override
+        )
+        _req = self._client.get(__url).json()
+        if keyisset("data", _req):
+            __all += _req["data"]
+        if keyisset("metadata", _req) and keyisset("next", _req["metadata"]):
+            __return["next"] = _req["metadata"]["next"]
+        return __return
+
+    def list_all(self, accounts_list: list = None, next_url: str = None) -> list:
+        accounts_list: list = accounts_list if accounts_list else []
+        __accounts = self.list() if not next_url else self.list(url_override=next_url)
+        accounts_list += __accounts["ServiceAccountList"]
+        if keyisset("next", __accounts):
+            return self.list_all(accounts_list, next_url=__accounts["next"])
+        return accounts_list
 
     def read(self):
         return self._client.get(self.href)
@@ -102,16 +120,18 @@ class ServiceAccount(IamV2Object):
         return req
 
     def import_api_keys(self):
-        url = f"{self._client.api_url}{self.api_keys_path}?owner={self.obj_id}"
-        req = self._client.get(url)
-        for _api_key in req.json()["data"]:
+        url = f"{self._client.api_url}{self.api_keys_path}?spec.owner={self.obj_id}&page_size=50"
+        req = self._client.get(url).json()
+        for _api_key in req["data"]:
+            owner = _api_key["spec"]["owner"]
+            if owner["id"] != self.obj_id:
+                continue
             new_key = ApiKey(
                 self._client,
                 obj_id=_api_key["id"],
                 owner_id=self.obj_id,
                 resource_id=_api_key["spec"]["resource"]["id"],
             )
-            # new_key.href = _api_key["metadata"]["self"]
             self._api_keys.append(new_key)
 
     def set_from_read(self, display_name: str = None, account_id: str = None):
@@ -131,7 +151,7 @@ class ServiceAccount(IamV2Object):
             self._description = data["description"]
             self._name = data["display_name"]
         elif not account_id and display_name:
-            accounts = self.list().json()["data"]
+            accounts = self.list_all()
             for _account in accounts:
                 if _account["display_name"] == display_name:
                     self._href = _account["metadata"]["self"]

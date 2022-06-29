@@ -22,6 +22,7 @@ exclude = ["*.pyc", "*~", "*pycache*"]
 [tool.poetry.dependencies]
 python = "^3.7"
 requests = "^2.27.1"
+compose-x-common = "^1.0"
 
 [tool.poetry.urls]
 "Bug Tracker" = "https://codeberg.org/compose-x/confluent-cloud-sdk/issues"
@@ -34,7 +35,6 @@ sphinx-material = "^0.0.35"
 coverage = "^6.3.1"
 tox = "^3.24.5"
 sphinx-jsonschema = "^1.17.2"
-compose-x-common = "^0.4.2"
 pre-commit = "^2.17.0"
 pyupgrade = "^2.32.0"
 pyclean = "^2.2.0"
