@@ -9,9 +9,6 @@ from typing import Optional
 
 from pydantic import BaseModel, Extra
 
-from . import cluster_v2, environmentv2, iam_v2_apikey, iam_v2_serviceaccount
-
-
 class ConfluentCloudApiResourcesSpecifications(BaseModel):
     pass
 
@@ -63,19 +60,3 @@ class ListMetadata(BaseModel):
     prev: Optional[str] = None
     next: Optional[str] = None
     total_size: Optional[float] = None
-
-
-class IamV2ApiKey(BaseModel):
-    __root__: iam_v2_apikey.SpecModel
-
-
-class IamV2ServiceAccount(BaseModel):
-    __root__: iam_v2_serviceaccount.Spec
-
-
-class ConfluentEnvV2(BaseModel):
-    __root__: environmentv2.Spec
-
-
-class ClusterV2(BaseModel):
-    __root__: cluster_v2.SpecModel
