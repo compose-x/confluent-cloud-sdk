@@ -3,10 +3,14 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Union
 
 if TYPE_CHECKING:
     from .client_factory import ConfluentClient
+
+from .confluent_cloud_api.environmentv2 import (
+    Spec as ConfluentEnvironmentV2,
+)
 
 
 class ConfluentEnvironment:
@@ -17,29 +21,26 @@ class ConfluentEnvironment:
 
     api_path = "/org/v2/environments"
 
-    def __init__(self, client: ConfluentClient, name: str = None):
+    def __init__(self, client: ConfluentClient, env_id: str = None, spec: dict = None):
         self._client = client
-        self._id = None
-        self._name = name
-        self._href = None
+        self._resource = None
+        self._resource_class = ConfluentEnvironmentV2
+
+        if env_id and not spec:
+            req = self._client.get(f"{self._client.api_url}/{self.api_path}")
+            self._resource = self._resource_class(**req.json())
+        elif spec:
+            self._resource = self._resource_class(**spec)
 
     @property
-    def obj_id(self):
-        return self._id
-
-    @obj_id.setter
-    def obj_id(self, id_value):
-        self._id = id_value
+    def resource(self) -> ConfluentEnvironmentV2:
+        return self._resource
 
     @property
-    def href(self):
-        if self._href:
-            return self._href
-        return f"{self._client.api_url}{self.api_path}/{self.obj_id}"
-
-    @href.setter
-    def href(self, url):
-        self._href = url
+    def obj_id(self) -> Union[None, str]:
+        if self._resource:
+            return self._resource.id.__root__
+        return None
 
     def list(self):
         if self.api_path:
@@ -47,19 +48,17 @@ class ConfluentEnvironment:
         return None
 
     def read(self):
-        return self._client.get(self.href)
+        return self._client.get(self.resource.metadata.self)
 
     def update(self, description: str):
-        return self._client.patch(self.href, data={"description": description})
+        return self._client.patch(
+            self.resource.metadata.self, data={"display_name": description}
+        )
 
     def delete(self):
-        return self._client.delete(self.href)
+        return self._client.delete(self.resource.metadata.self)
 
-    def create(self, name: str = None):
-        if not name and not self._name:
-            raise ValueError("You must specify a name for the environment")
-        if name:
-            self._name = name
+    def create(self, name: str):
         self._client.post(
-            f"{self._client.api_url}{self.api_path}", json={"display_name": self._name}
+            f"{self._client.api_url}{self.api_path}", json={"display_name": name}
         )

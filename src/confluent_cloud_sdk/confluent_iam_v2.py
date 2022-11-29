@@ -4,12 +4,16 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Union
 
 if TYPE_CHECKING:
+    from requests.models import Response
     from .client_factory import ConfluentClient
 
 from compose_x_common.compose_x_common import keyisset
+
+from .confluent_cloud_api.iam_v2_apikey import SpecModel as IamV2ApiKey
+from .confluent_cloud_api.iam_v2_serviceaccount import Spec as IamV2ServiceAccount
 
 
 class IamV2Object:
@@ -27,30 +31,163 @@ class IamV2Object:
         display_name: str = None,
         description: str = None,
     ):
+        self._resource = None
+        self._resource_class = None
         self._client = client_factory
         self._id = None
         self._name = display_name
         self._description = description
-        self._href = None
+        self._environment = None
         self.api_path = None
 
     @property
-    def obj_id(self):
-        return self._id
-
-    @obj_id.setter
-    def obj_id(self, id_value):
-        self._id = id_value
+    def resource(self) -> Union[IamV2ApiKey, IamV2ServiceAccount]:
+        return self._resource
 
     @property
-    def href(self):
-        if self._href:
-            return self._href
-        return f"{self._client.api_url}{self.api_path}/{self.obj_id}"
+    def obj_id(self) -> Union[None, str]:
+        if self._resource:
+            return self._resource.id.__root__
+        return None
 
-    @href.setter
-    def href(self, url):
-        self._href = url
+    def read(self) -> Union[dict, Response]:
+        if not self._resource:
+            return {}
+        return self._client.get(self._resource.metadata.self)
+
+    def update(self, description: str):
+        req = self._client.patch(
+            self._resource.metadata.self, data={"description": description}
+        )
+        if self._resource_class:
+            self._resource = self._resource_class(**req.json())
+        return req
+
+    def delete(self):
+        return self._client.delete(self._resource.metadata.self)
+
+
+class ServiceAccount(IamV2Object):
+    """
+    Class to manipulate Confluent cloud service account
+    """
+
+    def __init__(
+        self,
+        client_factory: ConfluentClient,
+        resource_id: str = None,
+        display_name: str = None,
+        description: str = None,
+        spec: dict = None,
+    ):
+        super().__init__(client_factory, display_name, description)
+        self._resource_class = IamV2ServiceAccount
+        self.api_path = self.services_accounts_path
+        self._api_keys: dict = {}
+
+        if resource_id and not spec:
+            self._resource = self._resource_class(
+                **client_factory.get(
+                    f"{self._client.api_url}{self.api_path}/{resource_id}"
+                ).json()
+            )
+        elif spec:
+            self._resource = self._resource_class(**spec)
+
+    @property
+    def api_keys(self) -> dict[str, ApiKey]:
+        return self._api_keys
+
+    @property
+    def api_keys_list(self) -> list:
+        return list(self.api_keys.values())
+
+    @property
+    def friendly_name(self) -> str:
+        if not self._resource:
+            return ""
+        if self._resource.display_name:
+            return self._resource.display_name
+        elif self._resource.description:
+            return self._resource.description
+        else:
+            return self.obj_id
+
+    def create(self):
+        """
+        `create <https://docs.confluent.io/cloud/current/api.html#operation/createIamV2ServiceAccount>`_
+        """
+        url = f"{self._client.api_url}{self.api_path}"
+        if not self._description:
+            description = self._name.title()
+        else:
+            description = self._description
+        payload = {"display_name": self._name, "description": description}
+        req = self._client.post(url, data=payload)
+        self._resource = self._resource_class(**req.json())
+        return req
+
+    def import_api_keys(self):
+        if not self._resource:
+            return
+        url = f"{self._client.api_url}{self.api_keys_path}?spec.owner={self.obj_id}&page_size=50"
+        req = self._client.get(url).json()
+        for _api_key in req["data"]:
+            owner = _api_key["spec"]["owner"]
+            if owner["id"] != self.obj_id:
+                continue
+            try:
+                new_key = ApiKey(
+                    self._client,
+                    spec=_api_key,
+                )
+                self.api_keys[new_key.obj_id] = new_key
+            except Exception as error:
+                print(error)
+                new_key = ApiKey(
+                    self._client,
+                    resource_id=_api_key["id"],
+                )
+                self.api_keys[new_key.obj_id] = new_key
+
+    def create_api_key(
+        self,
+        resource_id: str = None,
+        environment_id: str = None,
+        display_name: str = None,
+        description: str = None,
+    ) -> ApiKey:
+        api_key = ApiKey(self._client)
+        api_key.create(
+            self.obj_id, resource_id, environment_id, display_name, description
+        )
+        self.api_keys[api_key.obj_id] = api_key
+        return api_key
+
+    def delete_api_key(self, api_key_id: str):
+        if api_key_id in self.api_keys:
+            self.api_keys[api_key_id].delete()
+            del self.api_keys[api_key_id]
+
+    def set_from_read(self, display_name: str, account_id: str = None):
+        """
+        Sets the properties from lookup
+        :param display_name:
+        :param account_id:
+        :return:
+        """
+        if account_id:
+            req = self._client.get(
+                f"{self._client.api_url}{self.api_path}/{account_id}"
+            )
+            self._resource = self._resource_class(**req.json())
+        elif not account_id and display_name:
+            accounts = self.list_all()
+            for _account in accounts:
+                if _account["display_name"] == display_name:
+                    self._resource = self._resource_class(**_account)
+            else:
+                print(f"Unable to find account {display_name} in Confluent account")
 
     def list(self, url_override: str = None) -> dict:
         __all: list = []
@@ -75,90 +212,6 @@ class IamV2Object:
             return self.list_all(accounts_list, next_url=__accounts["next"])
         return accounts_list
 
-    def read(self):
-        return self._client.get(self.href)
-
-    def update(self, description: str):
-        return self._client.patch(self.href, data={"description": description})
-
-    def delete(self):
-        return self._client.delete(self.href)
-
-
-class ServiceAccount(IamV2Object):
-    """
-    Class to manipulate Confluent cloud service account
-    """
-
-    def __init__(
-        self,
-        client_factory: ConfluentClient,
-        obj_id: str = None,
-        display_name: str = None,
-        description: str = None,
-    ):
-        self._id = obj_id
-        self._href = None
-        super().__init__(client_factory, display_name, description)
-        self.api_path = self.services_accounts_path
-        self._api_keys = []
-
-    def create(self):
-        """
-        `create <https://docs.confluent.io/cloud/current/api.html#operation/createIamV2ServiceAccount>`_
-        """
-        url = f"{self._client.api_url}{self.api_path}"
-        if not self._description:
-            description = self._name.title()
-        else:
-            description = self._description
-        payload = {"display_name": self._name, "description": description}
-        req = self._client.post(url, data=payload)
-        payload = req.json()
-        self._href = payload["metadata"]["self"]
-        self.obj_id = payload["id"]
-        return req
-
-    def import_api_keys(self):
-        url = f"{self._client.api_url}{self.api_keys_path}?spec.owner={self.obj_id}&page_size=50"
-        req = self._client.get(url).json()
-        for _api_key in req["data"]:
-            owner = _api_key["spec"]["owner"]
-            if owner["id"] != self.obj_id:
-                continue
-            new_key = ApiKey(
-                self._client,
-                obj_id=_api_key["id"],
-                owner_id=self.obj_id,
-                resource_id=_api_key["spec"]["resource"]["id"],
-            )
-            self._api_keys.append(new_key)
-
-    def set_from_read(self, display_name: str = None, account_id: str = None):
-        """
-        Sets the properties from lookup
-        :param display_name:
-        :param account_id:
-        :return:
-        """
-        display_name = display_name if display_name else self._name
-        account_id = account_id if account_id else self.obj_id
-        if account_id:
-            self.obj_id = account_id
-            data = self.read().json()
-            self._href = data["metadata"]["self"]
-            self.obj_id = data["id"]
-            self._description = data["description"]
-            self._name = data["display_name"]
-        elif not account_id and display_name:
-            accounts = self.list_all()
-            for _account in accounts:
-                if _account["display_name"] == display_name:
-                    self._href = _account["metadata"]["self"]
-                    self.obj_id = _account["id"]
-                    self._description = _account["description"]
-                    self._name = _account["display_name"]
-
 
 class ApiKey(IamV2Object):
     """
@@ -168,32 +221,29 @@ class ApiKey(IamV2Object):
     def __init__(
         self,
         client_factory: ConfluentClient,
-        obj_id: str = None,
         display_name: str = None,
         description: str = None,
-        owner_id: str = None,
         resource_id: str = None,
+        spec: dict = None,
     ):
         super().__init__(client_factory, display_name, description)
-        self._id = obj_id
-        self._resource_id = resource_id
-        self._owner_id = owner_id
-        self._href = None
         self.api_path = self.api_keys_path
-        self._secret = None
+        self._resource_class = IamV2ApiKey
 
-    @property
-    def owner_id(self):
-        return self._owner_id
-
-    @property
-    def resource_id(self):
-        return self._resource_id
+        if resource_id and not spec:
+            self._resource = self._resource_class(
+                **client_factory.get(
+                    f"{self._client.api_url}{self.api_path}/{resource_id}"
+                ).json()
+            )
+        elif spec:
+            self._resource = self._resource_class(**spec)
 
     def create(
         self,
-        owner_id: str = None,
+        owner_id: str,
         resource_id: str = None,
+        environment_id: str = None,
         display_name: str = None,
         description: str = None,
     ):
@@ -201,37 +251,31 @@ class ApiKey(IamV2Object):
         `create <https://docs.confluent.io/cloud/current/api.html#operation/createIamV2ApiKey>`_
         """
         url = f"{self._client.api_url}{self.api_path}"
-        if not owner_id and not self.owner_id:
-            raise AttributeError("Owner ID must be specified")
-        owner_id = owner_id if owner_id else self._owner_id
-        if not resource_id and not self.resource_id:
-            raise AttributeError("Resource ID must be specified")
-        resource_id = resource_id if resource_id else self.resource_id
-        if not display_name and not self._name:
-            display_name = f"{owner_id}::{resource_id}"
-        elif not display_name and self._name:
-            display_name = self._name
-        if not description and not self._description:
-            description = display_name.replace(r"::", " ").title()
-        elif not description and self._description:
-            description = self._description
-        payload = {
-            "spec": {
-                "owner": {"id": owner_id},
-                "resource": {"id": resource_id},
-                "display_name": display_name,
-                "description": description,
-            }
+
+        spec: dict = {
+            "owner": {"id": owner_id},
         }
+        if not display_name and resource_id:
+            display_name = f"{owner_id}_{resource_id}"
+        if display_name:
+            spec["display_name"] = display_name
+
+        if not description and display_name:
+            description = display_name.replace(r"_", " ").title()
+        if description:
+            spec["description"] = description
+
+        resource: dict = {}
+        if resource_id:
+            resource["id"] = resource_id
+        if resource and environment_id:
+            resource["environment"] = environment_id
+        if resource:
+            spec["resource"] = resource
+
         req = self._client.post(
             url,
-            data=payload,
+            data={"spec": spec},
         )
-        reply_data = req.json()
-        spec = reply_data["spec"]
-        self.obj_id = reply_data["id"]
-        self._href = reply_data["metadata"]["self"]
-        self._owner_id = spec["owner"]["id"]
-        self._resource_id = spec["resource"]["id"]
-        self._secret = spec["secret"]
+        self._resource = self._resource_class(**req.json())
         return req

@@ -1,0 +1,26 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "CloudEnvironmentV2",
+  "id": "CloudEnvironmentV2",
+  "type": "object",
+  "title": "Confluent CloudEnvironment v2",
+  "description": "https://docs.confluent.io/cloud/current/api.html#tag/Environments-(orgv2)",
+  "additionalProperties": false,
+  "properties": {
+    "api_version": {
+      "$ref": "confluent-cloud-api.spec.json#/definitions/ApiVersion"
+    },
+    "id": {
+      "$ref": "confluent-cloud-api.spec.json/#definitions/Id"
+    },
+    "kind": {
+      "$ref": "confluent-cloud-api.spec.json/#definitions/Kind"
+    },
+    "metadata": {
+      "$ref": "confluent-cloud-api.spec.json#/definitions/ResourceMetadata"
+    },
+    "display_name": {
+      "type": "string"
+    }
+  }
+}

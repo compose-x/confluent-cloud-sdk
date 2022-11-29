@@ -1,0 +1,65 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "ClusterV2",
+  "id": "ClusterV2",
+  "type": "object",
+  "title": "Confluent Cluster v2",
+  "description": "https://docs.confluent.io/cloud/current/api.html#tag/Clusters-(cmkv2)",
+  "additionalProperties": false,
+  "properties": {
+    "api_version": {
+      "$ref": "confluent-cloud-api.spec.json#/definitions/ApiVersion"
+    },
+    "id": {
+      "$ref": "confluent-cloud-api.spec.json/#definitions/Id"
+    },
+    "kind": {
+      "$ref": "confluent-cloud-api.spec.json/#definitions/Kind"
+    },
+    "metadata": {
+      "$ref": "confluent-cloud-api.spec.json#/definitions/ResourceMetadata"
+    },
+    "spec": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "display_name": {
+          "type": "string"
+        },
+        "availability": {
+          "type": "string"
+        },
+        "cloud": {
+          "type": "string"
+        },
+        "region": {
+          "type": "string"
+        },
+        "kafka_bootstrap_endpoint": {
+          "type": "string"
+        },
+        "http_endpoint": {
+          "type": "string"
+        },
+        "environment": {
+          "$ref": "confluent-cloud-api.spec.json#/definitions/SpecElement"
+        },
+        "network": {
+          "$ref": "confluent-cloud-api.spec.json#/definitions/SpecElement"
+        }
+      }
+    },
+    "status": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "phase": {
+          "type": "string"
+        },
+        "cku": {
+          "type": "integer"
+        }
+      }
+    }
+  }
+}

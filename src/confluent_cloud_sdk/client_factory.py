@@ -6,6 +6,11 @@ Client factory
 """
 from __future__ import annotations
 
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from requests.models import Response
+
 import base64
 
 import requests
@@ -37,53 +42,37 @@ class ConfluentClient:
         }
 
     @evaluate_api_return
-    def get(self, url: str, ignore_failure: bool = False, **kwargs):
+    def get(self, url: str, ignore_failure: bool = False, **kwargs) -> Response:
         """
         Requests.GET wrapper
-
-        :param url:
-        :param ignore_failure: whether or not ignore failure error codes
-        :param kwargs:
-        :return:
         """
         req = requests.get(url, headers=self.headers, **kwargs)
         return req
 
     @evaluate_api_return
-    def post(self, url: str, data: dict, ignore_failure: bool = False, **kwargs):
+    def post(
+        self, url: str, data: dict, ignore_failure: bool = False, **kwargs
+    ) -> Response:
         """
-        Requests.GET wrapper
-
-        :param url:
-        :param ignore_failure: whether or not ignore failure error codes
-        :param kwargs:
-        :return:
+        Requests.POST wrapper
         """
         req = requests.post(url, headers=self.headers, json=data, **kwargs)
         return req
 
     @evaluate_api_return
-    def patch(self, url: str, data: dict, ignore_failure: bool = False, **kwargs):
+    def patch(
+        self, url: str, data: dict, ignore_failure: bool = False, **kwargs
+    ) -> Response:
         """
-        Requests.GET wrapper
-
-        :param url:
-        :param ignore_failure: whether or not ignore failure error codes
-        :param kwargs:
-        :return:
+        Requests.PATCH wrapper
         """
         req = requests.patch(url, headers=self.headers, json=data, **kwargs)
         return req
 
     @evaluate_api_return
-    def delete(self, url: str, ignore_failure: bool = False, **kwargs):
+    def delete(self, url: str, ignore_failure: bool = False, **kwargs) -> Response:
         """
-        Requests.GET wrapper
-
-        :param url:
-        :param ignore_failure: whether or not ignore failure error codes
-        :param kwargs:
-        :return:
+        Requests.DELETE wrapper
         """
         req = requests.delete(url, headers=self.headers, **kwargs)
         return req
