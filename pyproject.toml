@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "confluent_cloud_sdk"
-version = "0.1.3"
+version = "0.2.0"
 description = "Confluent Cloud API SDK"
 authors = ["John Preston <john@ews-network.net>"]
 license = "GPL-2-only"
@@ -61,7 +61,7 @@ target-python-version = "3.8"
 github_url = "https://codeberg.org/compose-x/confluent-cloud-sdk"
 
 [tool.tbump.version]
-current = "0.1.3"
+current = "0.2.0"
 
 regex = '''
   (?P<major>\d+)
