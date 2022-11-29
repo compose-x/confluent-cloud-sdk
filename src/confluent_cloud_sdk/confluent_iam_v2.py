@@ -5,6 +5,7 @@
 from __future__ import annotations
 
 from typing import TYPE_CHECKING, Union
+from datetime import datetime as dt, timedelta as td
 
 if TYPE_CHECKING:
     from requests.models import Response
@@ -238,6 +239,13 @@ class ApiKey(IamV2Object):
             )
         elif spec:
             self._resource = self._resource_class(**spec)
+
+    @property
+    def age(self) -> Union[td, None]:
+        if not self._resource:
+            return None
+        now = dt.now()
+        return now - self.resource.metadata.created_at.replace(tzinfo=None)
 
     def create(
         self,
