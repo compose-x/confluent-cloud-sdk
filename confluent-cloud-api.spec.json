@@ -1,0 +1,103 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "confluent-cloud-api.spec.json",
+  "id": "confluent-cloud-api",
+  "type": "object",
+  "title": "confluent-cloud-api Resources specifications",
+  "additionalProperties": false,
+  "properties": {
+  },
+  "definitions": {
+    "IamV2ApiKey": {
+      "$ref": "iam-v2-apikey.spec.json"
+    },
+    "IamV2ServiceAccount": {
+      "$ref": "iam-v2-serviceaccount.spec.json"
+    },
+    "ConfluentEnvV2": {
+      "$ref": "environmentv2.spec.json"
+    },
+    "ClusterV2": {
+      "$ref": "cluster-v2.spec.json"
+    },
+    "ApiVersion": {
+      "type": "string"
+    },
+    "Kind": {
+      "type": "string"
+    },
+    "Id": {
+      "type": "string"
+    },
+    "SpecElement": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "$ref": "#/definitions/Id"
+        },
+        "environment": {
+          "type": "string"
+        },
+        "related": {
+          "type": "string"
+        },
+        "resource_name": {
+          "type": "string"
+        },
+        "api_version": {
+          "$ref": "#/definitions/ApiVersion"
+        },
+        "kind": {
+          "$ref": "#/definitions/Kind"
+        }
+      }
+    },
+    "ResourceMetadata": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "self": {
+          "type": "string"
+        },
+        "resource_name": {
+          "type": "string"
+        },
+        "created_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "updated_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "deleted_at": {
+          "type": "string",
+          "format": "date-time"
+        }
+      }
+    },
+    "ListMetadata": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "first": {
+          "type": "string"
+        },
+        "last": {
+          "type": "string"
+        },
+        "prev": {
+          "type": "string"
+        },
+        "next": {
+          "type": "string"
+        },
+        "total_size": {
+          "type": "number"
+        }
+      }
+    }
+  }
+}
+

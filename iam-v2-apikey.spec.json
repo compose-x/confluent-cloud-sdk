@@ -1,0 +1,44 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "IamV2ApiKey",
+  "id": "IamV2ApiKey",
+  "type": "object",
+  "title": "IAM V2 ApiKey",
+  "description": "https://docs.confluent.io/cloud/current/api.html#tag/API-Keys-(iamv2)/The-API-Keys-Model",
+  "additionalProperties": false,
+  "properties": {
+    "api_version": {
+      "$ref": "confluent-cloud-api.spec.json#/definitions/ApiVersion"
+    },
+    "id": {
+      "$ref": "confluent-cloud-api.spec.json/#definitions/Id"
+    },
+    "kind": {
+      "$ref": "confluent-cloud-api.spec.json/#definitions/Kind"
+    },
+    "metadata": {
+      "$ref": "confluent-cloud-api.spec.json#/definitions/ResourceMetadata"
+    },
+    "spec": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "display_name": {
+          "type": "string"
+        },
+        "description": {
+          "type": "string"
+        },
+        "secret": {
+          "type": "string"
+        },
+        "owner": {
+          "$ref": "confluent-cloud-api.spec.json#/definitions/SpecElement"
+        },
+        "resource": {
+          "$ref": "confluent-cloud-api.spec.json#/definitions/SpecElement"
+        }
+      }
+    }
+  }
+}

@@ -3,6 +3,11 @@
 
 from __future__ import annotations
 
+import warnings
+from typing import Union
+
+from .confluent_cloud_api.cluster_v2 import SpecModel as ClusterV2
+
 
 class KafkaClusterV2:
     """
@@ -17,48 +22,34 @@ class KafkaClusterV2:
         self,
         client,
         environment_id: str,
-        display_name: str = None,
-        description: str = None,
     ):
-
-        self._client = client
-        self._id = None
-        self._env_id = environment_id
-        self._name = display_name
-        self._description = description
-        self._href = None
         self.api_path = self.clusters_path
+        self._client = client
+        self._resource = None
+        self._resource_class = ClusterV2
 
     @property
-    def obj_id(self):
-        return self._id
-
-    @obj_id.setter
-    def obj_id(self, id_value):
-        self._id = id_value
+    def resource(self) -> ClusterV2:
+        return self._resource
 
     @property
-    def href(self):
-        if self._href:
-            return self._href
-        return f"{self._client.api_url}{self.api_path}/{self.obj_id}?environment={self._env_id}"
-
-    @href.setter
-    def href(self, url):
-        self._href = url
-
-    def list(self):
-        if self.api_path:
-            return self._client.get(
-                f"{self._client.api_url}{self.api_path}?environment={self._env_id}"
-            )
+    def obj_id(self) -> Union[None, str]:
+        if self._resource:
+            return self._resource.id.__root__
         return None
 
+    def list(self, environment_id: str) -> list:
+        if self.api_path:
+            return self._client.get(
+                f"{self._client.api_url}{self.api_path}?environment={environment_id}"
+            )
+        return []
+
     def read(self):
-        return self._client.get(self.href)
+        return self._client.get(self.resource)
 
     def update(self, description: str):
-        return self._client.patch(self.href, data={"description": description})
+        warnings.warn(NotImplemented("Update cluster not implemented"))
 
     def delete(self):
-        return self._client.delete(self.href)
+        return self._client.delete(self.resource.metadata.self)
