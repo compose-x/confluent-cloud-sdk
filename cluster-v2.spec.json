@@ -23,13 +23,57 @@
       "type": "object",
       "additionalProperties": false,
       "properties": {
-        "display_name": {
+        "api_endpoint": {
           "type": "string"
         },
         "availability": {
           "type": "string"
         },
         "cloud": {
+          "type": "string"
+        },
+        "byok": {
+          "type": "object",
+          "properties": {
+            "api_version": {
+              "$ref": "confluent-cloud-api.spec.json#/definitions/ApiVersion"
+            },
+            "id": {
+              "type": "string"
+            },
+            "kind": {
+              "$ref": "confluent-cloud-api.spec.json#/definitions/Kind"
+            },
+            "related": {
+              "type": "string"
+            },
+            "resource_name": {
+              "type": "string"
+            }
+          }
+        },
+        "config": {
+          "type": "object",
+          "additionalProperties": true,
+          "properties": {
+            "cku": {
+              "type": "integer"
+            },
+            "encryption_key": {
+              "type": "string"
+            },
+            "kind": {
+              "type": "string"
+            },
+            "zones": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        "display_name": {
           "type": "string"
         },
         "region": {

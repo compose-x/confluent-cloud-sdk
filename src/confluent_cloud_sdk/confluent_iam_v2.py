@@ -4,8 +4,9 @@
 
 from __future__ import annotations
 
+from datetime import datetime as dt
+from datetime import timedelta as td
 from typing import TYPE_CHECKING, Union
-from datetime import datetime as dt, timedelta as td
 
 if TYPE_CHECKING:
     from requests.models import Response
@@ -13,6 +14,7 @@ if TYPE_CHECKING:
 
 from compose_x_common.compose_x_common import keyisset
 
+from .confluent_cloud_api import ResourcesList
 from .confluent_cloud_api.iam_v2_apikey import SpecModel as IamV2ApiKey
 from .confluent_cloud_api.iam_v2_serviceaccount import Spec as IamV2ServiceAccount
 
@@ -23,8 +25,8 @@ class IamV2Object:
     """
 
     api_v2_path = "/iam/v2"
-    api_keys_path = f"{api_v2_path}/api-keys"
-    services_accounts_path = f"{api_v2_path}/service-accounts"
+    api_keys_path = "/api-keys"
+    services_accounts_path = "/service-accounts"
 
     def __init__(
         self,
@@ -73,6 +75,8 @@ class ServiceAccount(IamV2Object):
     Class to manipulate Confluent cloud service account
     """
 
+    api_path = f"{IamV2Object.api_v2_path}{IamV2Object.services_accounts_path}"
+
     def __init__(
         self,
         client_factory: ConfluentClient,
@@ -83,7 +87,6 @@ class ServiceAccount(IamV2Object):
     ):
         super().__init__(client_factory, display_name, description)
         self._resource_class = IamV2ServiceAccount
-        self.api_path = self.services_accounts_path
         self._api_keys: dict = {}
 
         if resource_id and not spec:
@@ -131,7 +134,7 @@ class ServiceAccount(IamV2Object):
     def import_api_keys(self):
         if not self._resource:
             return
-        url = f"{self._client.api_url}{self.api_keys_path}?spec.owner={self.obj_id}&page_size=50"
+        url = f"{self._client.api_url}{ApiKey.api_path}?spec.owner={self.obj_id}&page_size=50"
         req = self._client.get(url).json()
         for _api_key in req["data"]:
             owner = _api_key["spec"]["owner"]
@@ -170,54 +173,13 @@ class ServiceAccount(IamV2Object):
             self.api_keys[api_key_id].delete()
             del self.api_keys[api_key_id]
 
-    def set_from_read(self, display_name: str, account_id: str = None):
-        """
-        Sets the properties from lookup
-        :param display_name:
-        :param account_id:
-        :return:
-        """
-        if account_id:
-            req = self._client.get(
-                f"{self._client.api_url}{self.api_path}/{account_id}"
-            )
-            self._resource = self._resource_class(**req.json())
-        elif not account_id and display_name:
-            accounts = self.list_all()
-            for _account in accounts:
-                if _account["display_name"] == display_name:
-                    self._resource = self._resource_class(**_account)
-            else:
-                print(f"Unable to find account {display_name} in Confluent account")
-
-    def list(self, url_override: str = None) -> dict:
-        __all: list = []
-        __return = {"ServiceAccountList": __all}
-        __url = (
-            f"{self._client.api_url}{self.api_path}?page_size=30"
-            if not url_override
-            else url_override
-        )
-        _req = self._client.get(__url).json()
-        if keyisset("data", _req):
-            __all += _req["data"]
-        if keyisset("metadata", _req) and keyisset("next", _req["metadata"]):
-            __return["next"] = _req["metadata"]["next"]
-        return __return
-
-    def list_all(self, accounts_list: list = None, next_url: str = None) -> list:
-        accounts_list: list = accounts_list if accounts_list else []
-        __accounts = self.list() if not next_url else self.list(url_override=next_url)
-        accounts_list += __accounts["ServiceAccountList"]
-        if keyisset("next", __accounts):
-            return self.list_all(accounts_list, next_url=__accounts["next"])
-        return accounts_list
-
 
 class ApiKey(IamV2Object):
     """
     `API Key <https://docs.confluent.io/cloud/current/api.html#section/The-Api-Keys-Model>`_
     """
+
+    api_path = f"{IamV2Object.api_v2_path}{IamV2Object.api_keys_path}"
 
     def __init__(
         self,
@@ -228,7 +190,6 @@ class ApiKey(IamV2Object):
         spec: dict = None,
     ):
         super().__init__(client_factory, display_name, description)
-        self.api_path = self.api_keys_path
         self._resource_class = IamV2ApiKey
 
         if resource_id and not spec:

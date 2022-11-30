@@ -20,6 +20,27 @@
     "ClusterV2": {
       "$ref": "cluster-v2.spec.json"
     },
+    "ResourcesList": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "api_version": {
+          "$ref": "#/definitions/ApiVersion"
+        },
+        "kind": {
+          "$ref": "#/definitions/Kind"
+        },
+        "metadata": {
+          "$ref": "#/definitions/ListMetadata"
+        },
+        "data": {
+          "type": "array",
+          "items": {
+            "type": "object"
+          }
+        }
+      }
+    },
     "ApiVersion": {
       "type": "string"
     },

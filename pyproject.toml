@@ -26,6 +26,7 @@ pydantic = "^1.10.2"
 
 [tool.poetry.urls]
 "Bug Tracker" = "https://codeberg.org/compose-x/confluent-cloud-sdk/issues"
+"Confluent API Documentation" = "https://docs.confluent.io/cloud/current/api.html"
 
 [tool.poetry.dev-dependencies]
 isort = "^5.10.1"
@@ -36,7 +37,6 @@ pre-commit = "^2.17.0"
 pyupgrade = "^3.2"
 pyclean = "^2.2.0"
 tbump = "^6.8.0"
-twine = "^4.0.0"
 
 [tool.poetry.group.docs.dependencies]
 sphinx = "^5.3.0"

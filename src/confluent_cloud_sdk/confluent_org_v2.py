@@ -3,14 +3,16 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Union
+from typing import TYPE_CHECKING, List, Optional, Union
+
+from pydantic import BaseModel, Extra
+
+from .confluent_cloud_api import ResourcesList
 
 if TYPE_CHECKING:
     from .client_factory import ConfluentClient
 
-from .confluent_cloud_api.environmentv2 import (
-    Spec as ConfluentEnvironmentV2,
-)
+from .confluent_cloud_api.environmentv2 import Spec as ConfluentEnvironmentV2
 
 
 class ConfluentEnvironment:
@@ -27,7 +29,10 @@ class ConfluentEnvironment:
         self._resource_class = ConfluentEnvironmentV2
 
         if env_id and not spec:
-            req = self._client.get(f"{self._client.api_url}/{self.api_path}")
+            req = self._client.get(f"{self._client.api_url}/{self.api_path}/{env_id}")
+            import json
+
+            print(json.dumps(req.json(), indent=2))
             self._resource = self._resource_class(**req.json())
         elif spec:
             self._resource = self._resource_class(**spec)
@@ -40,11 +45,6 @@ class ConfluentEnvironment:
     def obj_id(self) -> Union[None, str]:
         if self._resource:
             return self._resource.id.__root__
-        return None
-
-    def list(self):
-        if self.api_path:
-            return self._client.get(f"{self._client.api_url}{self.api_path}")
         return None
 
     def read(self):

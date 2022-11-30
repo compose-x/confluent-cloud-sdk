@@ -72,7 +72,7 @@ class GenericForbidden(ConfluentException):
 
 class ConfluentApiException(ConfluentException):
     """
-    Top class for DatabaseUser exceptions
+    Top class for Confluent API Exceptions
     """
 
     def __init__(self, code, details):

@@ -15,6 +15,7 @@ import base64
 
 import requests
 
+from .confluent_cloud_api import ResourcesList
 from .errors import evaluate_api_return
 
 
@@ -76,3 +77,33 @@ class ConfluentClient:
         """
         req = requests.delete(url, headers=self.headers, **kwargs)
         return req
+
+    def list_all(
+        self,
+        resource_class,
+        accounts_list: list = None,
+        next_url: str = None,
+        url_args: str = "",
+    ) -> list:
+        if accounts_list is None:
+            accounts_list: list = []
+        if next_url:
+            _req = self.get(next_url)
+        else:
+            url = (
+                f"{self.api_url}{resource_class.api_path}"
+                if not url_args
+                else f"{self.api_url}{resource_class.api_path}{url_args}"
+            )
+            print("RESOURCE URL?", url)
+            _req = self.get(url)
+        list_input = ResourcesList(**_req.json())
+
+        accounts_list += [
+            resource_class(self, spec=account) for account in list_input.data
+        ]
+        if list_input.metadata.next:
+            return self.list_all(
+                resource_class, accounts_list, next_url=list_input.metadata.next
+            )
+        return accounts_list

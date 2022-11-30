@@ -16,11 +16,6 @@ Installation
 
     pip install confluent-cloud-sdk
 
-Usage examples
-==================
-
-For more details, see docs/usage.rst
-
 Imports
 ---------
 
@@ -34,7 +29,6 @@ To use Confluent Admin API SDK in a project
     from confluent_cloud_sdk.confluent_iam_v2 import ServiceAccount
 
 
-
 Initialize connection
 ----------------------
 
@@ -46,50 +40,52 @@ Initialize connection
         "cloud_key_secret",
     )
 
-
-List all service accounts
---------------------------
-
-.. code-block:: python
-
-    accounts_request = ServiceAccount(client, None).list()
-    for account in accounts_request.json()["data"]
-        print(account)
-
-
-Create a new service account
------------------------------
+Example with secret in AWS And list all assets
+------------------------------------------------
 
 .. code-block:: python
 
-    new_service_account = ServiceAccount(
-        client, display_name="test_client", description="A simple service account"
-    )
-    try:
-        new_service_account.create() # we try to create the user. If already exists, there will be conflict.
-    except GenericConflict:
-        new_service_account.set_from_read()
+    import json
+    from os import environ
 
-    print("SVC ACCOUNT ID IS", new_service_account.obj_id)
+    from boto3.session import Session
+    from confluent_cloud_sdk.client_factory import ConfluentClient
+    from confluent_cloud_sdk.confluent_iam_v2 import ServiceAccount
+    from confluent_cloud_sdk.confluent_org_v2 import ConfluentEnvironment
+    from confluent_cloud_sdk.confluent_cluster_v2 import KafkaClusterV2
 
-
-List all API Keys of the service account
----------------------------------------------
-
-.. code-block:: python
-
-    new_service_account.import_api_keys()
-    for key in new_service._api_keys:
-        print(key.id)
+    from compose_x_common.aws import get_session
 
 
-Create a new API Key for the service account for a given resource
--------------------------------------------------------------------
+    def get_confluent_admin_secret(
+        secret_arn: str,
+        session: Session = None,
+        key_id: str = "ApiKey",
+        secret_id: str = "ApiSecret",
+    ) -> ConfluentClient:
+        session = get_session(session)
+        client = session.client("secretsmanager")
+        value = json.loads(client.get_secret_value(SecretId=secret_arn)["SecretString"])
+        return ConfluentClient(value[key_id], value[secret_id])
 
-.. code-block:: python
 
-    new_api_key = ApiKey(client, display_name="new-test-key")
-    new_api_key.create(
-        owner_id=new_service_account.obj_id,
-        resource_id="cluster_id",
-    )
+    cclient = get_confluent_admin_secret(environ.get("SECRET_ARN"))
+
+    envs = cclient.list_all(ConfluentEnvironment)
+
+    for env in envs:
+        print(env.obj_id)
+        clusters = cclient.list_all(KafkaClusterV2, url_args=f"?environment={env.obj_id}")
+        for cluster in clusters:
+            print(cluster.obj_id)
+
+    svc_accounts = cclient.list_all(ServiceAccount)
+    for svc_account in svc_accounts:
+        print(svc_account.obj_id)
+        svc_account.import_api_keys()
+        print([key.obj_id for key in svc_account.api_keys.values()])
+
+Usage examples
+==================
+
+For more details, see docs/usage.rst
