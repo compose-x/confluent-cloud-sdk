@@ -21,7 +21,7 @@ exclude = ["*.pyc", "*~", "*pycache*"]
 [tool.poetry.dependencies]
 python = "^3.8"
 requests = "^2.27.1"
-compose-x-common = "^1.2"
+compose-x-common = "^1.4"
 pydantic = "^1.10.2"
 
 [tool.poetry.urls]
